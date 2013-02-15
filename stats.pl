@@ -28,7 +28,7 @@ while(){
             <div class="well">
                 <p><strong>Uptime:</strong> $uptime</p>
                 <p><strong>uname:</strong> $uname</p>
-                <p><strong>Free space on HDD:</strong> $hddfree/$hdd <div class="progress"><div class="bar" style="width: $hddpercent"></div></div></p>
+                <p><strong>Free space on HDD:</strong> $hddfree/$hdd <div class="progress"><div class="bar" style="width: $hddpercent; text-indent: 50%; color: rgb(51, 51, 51);">$hddpercent</div></div></p>
             </div>
         <footer>
             <!--[if lte IE 8]><span style="filter: FlipH; -ms-filter: "FlipH"; display: inline-block;"><![endif]-->
