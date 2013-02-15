@@ -10,6 +10,7 @@ while(){
     my $uname = `uname -a`;
     my $hdd = (split/\s+/,`df -h /media/hdd`)[11];
     my $hddfree = (split/\s+/,`df -h /media/hdd`)[10];
+    my $hddpercent = (split/\s+/,`df -h /media/hdd`)[12];
 
     open FILE, ">/var/www/stats/index.html" or die $!;
 
@@ -27,7 +28,7 @@ while(){
             <div class="well">
                 <p><strong>Uptime:</strong> $uptime</p>
                 <p><strong>uname:</strong> $uname</p>
-                <p><strong>Free space on HDD:</strong> $hddfree/$hdd</p>
+                <p><strong>Free space on HDD:</strong> $hddfree/$hdd <div class="progress"><div class="bar" style="width: $hddpercent"></div></div></p>
             </div>
         <footer>
             <!--[if lte IE 8]><span style="filter: FlipH; -ms-filter: "FlipH"; display: inline-block;"><![endif]-->
