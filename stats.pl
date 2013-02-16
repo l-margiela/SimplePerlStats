@@ -5,11 +5,13 @@ use warnings;
 use strict;
 
 use Number::Bytes::Human qw(format_bytes);
+use Encode qw(encode_utf8);
 
 my $sleep = 5;
 while(){
     my $uptime = convert_time(uptime());
     my $uname = `uname -a`;
+    my $load = join" ",(split/\s+/, loadavg())[0..2];
 
     # Disk
     my $hdd = (split/\s+/,`df -h /media/hdd`)[11];
@@ -23,10 +25,11 @@ while(){
 
     open FILE, ">/var/www/stats/index.html" or die $!;
 
-    print FILE <<HTML;
+    print FILE encode_utf8 <<HTML;
     <!DOCTYPE html>
     <html>
             <head>
+            <meta charset='utf-8'>
             <title>Perl simple stats generator</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <!-- Bootstrap -->
@@ -35,9 +38,13 @@ while(){
         </head>
         <body>
             <div class="well">
+                <p><h4>··General</h4></p>
                 <p><strong>Uptime:</strong> $uptime</p>
                 <p><strong>uname:</strong> $uname</p>
+                <p><strong>Load:</strong> $load</p>
+                <p><h4>··Disks</h4></p>
                 <p><strong>Free space on HDD:</strong> $hddfree/$hdd <div class="progress"><div class="bar" style="width: $hddpercent; text-indent: 50%; color: rgb(51, 51, 51); ">$hddpercent</div></div></p>
+                <p><h4>··Network</h4></p>
                 <p><strong>Downloaded:</strong> $rx</p>
                 <p><strong>Uploaded:</strong> $tx</p>
             </div>
@@ -68,6 +75,12 @@ sub uptime{
     open*h,"</proc/uptime" and sysread*h,$f,100;
     close*h;
     return $f=~/^(\d+)/
+}
+sub loadavg{
+    my$f=0;
+    open*h,"</proc/loadavg" and sysread*h,$f,100;
+    close*h;
+    return $f;
 }
 sub convert_time { 
     my $time = shift; 
