@@ -1,29 +1,35 @@
+
 $|++;
 use utf8;
 use Data::Dumper;
 use warnings;
 use strict;
 
+use Config::Simple;
+
 use Number::Bytes::Human qw(format_bytes);
 use Encode qw(encode_utf8);
 
-my $sleep = 5;
+### Config and variables
+my $cfg = new Config::Simple('config.ini');
+my $disk = $cfg->param('disk');
+
 while(){
     my $uptime = convert_time(uptime());
     my $uname = `uname -a`;
     my $load = join" ",(split/\s+/, loadavg())[0..2];
 
     # Disk
-    my $hdd = (split/\s+/,`df -h /media/hdd`)[11];
-    my $hddfree = (split/\s+/,`df -h /media/hdd`)[10];
-    my $hddpercent = (split/\s+/,`df -h /media/hdd`)[12];
+    my $hdd = (split/\s+/,`df -h $disk`)[11];
+    my $hddfree = (split/\s+/,`df -h $disk`)[10];
+    my $hddpercent = (split/\s+/,`df -h `.$cfg->param('disk'))[12];
 
     # Network
     my $rx = format_bytes(red("/sys/class/net/eth0/statistics/rx_bytes"));
     my $tx = format_bytes(red("/sys/class/net/eth0/statistics/tx_bytes"));
 
 
-    open FILE, ">/var/www/stats/index.html" or die $!;
+    open FILE, ">./index.html" or die $!;
 
     print FILE encode_utf8 <<HTML;
     <!DOCTYPE html>
@@ -33,7 +39,7 @@ while(){
             <title>Perl simple stats generator</title>
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <!-- Bootstrap -->
-            <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+            <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
             <link href="css/style.css" rel="stylesheet" media="screen">
         </head>
         <body>
@@ -43,7 +49,9 @@ while(){
                 <p><strong>uname:</strong> $uname</p>
                 <p><strong>Load:</strong> $load</p>
                 <p><h4>··Disks</h4></p>
-                <p><strong>Free space on HDD:</strong> $hddfree/$hdd <div class="progress"><div class="bar" style="width: $hddpercent; text-indent: 50%; color: rgb(51, 51, 51); ">$hddpercent</div></div></p>
+                <p><strong>Free space on HDD:</strong> $hddfree/$hdd
+                    <div class="progress"><div class="bar" style="width: $hddpercent; text-indent: 50%; color: rgb(51, 51, 51); ">$hddpercent</div></div>
+                </p>
                 <p><h4>··Network</h4></p>
                 <p><strong>Downloaded:</strong> $rx</p>
                 <p><strong>Uploaded:</strong> $tx</p>
@@ -54,7 +62,7 @@ while(){
                 &copy;
             </span>
             <!--[if lte IE 8]></span><![endif]-->
-            xaxes
+            <a href="http://github.com/xaxes">xaxes</a>
         </footer>
         </body>
     </html>
@@ -62,7 +70,8 @@ HTML
     print "Updated.\n";
 
     close FILE;
-    sleep($sleep);
+    sleep($cfg->param('sleep'));
+    #print $Conf{'sleep'};
 }
 sub red{
     my($k,$f)=(shift);
@@ -74,7 +83,7 @@ sub uptime{
     my$f=0;
     open*h,"</proc/uptime" and sysread*h,$f,100;
     close*h;
-    return $f=~/^(\d+)/
+    return $f=~/^(\d+)/;
 }
 sub loadavg{
     my$f=0;
@@ -90,7 +99,7 @@ sub convert_time {
     $time -= ($hours * 3600); 
     my $minutes = int($time / 60); 
     my $seconds = $time % 60; 
-  
+
     $days = $days < 1 ? '' : $days .'d '; 
     $hours = $hours < 1 ? '' : $hours .'h '; 
     $minutes = $minutes < 1 ? '' : $minutes . 'm '; 

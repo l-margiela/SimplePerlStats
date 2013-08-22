@@ -1,3 +1,6 @@
 footer{
 	margin-left: 5px;
 }
+.progress .bar{
+	text-indent: 0%;
+}
